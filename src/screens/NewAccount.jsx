@@ -6,19 +6,24 @@ import { ScrollView } from "react-native";
 import defaultStyles from "../defaultStyles";
 import firebaseConfig from "./../config";
 import { initializeApp } from 'firebase/app';
+import { addDoc, collection, getFirestore } from 'firebase/firestore';
 
 const NewAccount = ({ navigation }) => {
 
     const app = initializeApp(firebaseConfig);
-    const [newUser, setNewUser] = useState({});
+    const [newUser, setNewUser] = useState({ alimentadores: {} });
     const [confirmPass, setConfirmPass] = useState('');
     const [isConfirmButtonDisabled, setIsConfirmButtonDisabled] = useState(true);
     
-    function onConfirmar() {
-        console.log({newUser})
+    async function onConfirmar() {
         const auth = getAuth();
+        const database = getFirestore(app);
+
         createUserWithEmailAndPassword(auth, newUser.email, newUser.pass)
             .then(credentials => {
+                delete newUser.pass;
+                newUser.uid = credentials.user.uid;
+                addDoc(collection(database, 'usuarios'), newUser);
                 ToastAndroid.showWithGravity('Conta criada com sucesso!', ToastAndroid.SHORT, ToastAndroid.CENTER);
                 navigation.navigate('HomePage');
             })

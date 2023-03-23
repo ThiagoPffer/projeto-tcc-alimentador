@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Pressable } from 'react-native';
 import { StyleSheet, Text, View, TextInput } from 'react-native';
 import defaultStyles from '../defaultStyles';
@@ -10,8 +10,17 @@ import { initializeApp } from 'firebase/app';
 const Login = ({navigation}) => {
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
     const [userData, setUserData] = React.useState({ email: '', pass: '' })
     const [isConfirmButtonDisabled, setIsConfirmButtonDisabled] = React.useState(true);
+    
+    useEffect(() => {
+        const currentUser = auth.currentUser;
+        console.log(currentUser);
+        if (currentUser) {
+            navigation.navigate('HomePage');
+        }    
+    })
 
     function onChangeUserData(inputData) {
         let { email, pass } = inputData;
@@ -20,7 +29,6 @@ const Login = ({navigation}) => {
     }
 
     function onConfirmar() {
-        const auth = getAuth();
         signInWithEmailAndPassword(auth, userData.email, userData.pass)
             .then(credentials => {
                 console.log('Logando...', credentials)
