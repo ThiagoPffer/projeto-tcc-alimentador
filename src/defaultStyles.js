@@ -23,15 +23,17 @@ const defaultStyles = StyleSheet.create({
         gap: 5
     },
     button: {
+        flexDirection: 'row',
+        gap: 15,
         width: '100%',
         height: 45,
         textTransform: 'capitalize',
         borderRadius: 4,
         alignItems: 'center',
-        justifyContent: 'center'
+        justifyContent: 'center',
+        backgroundColor: '#4790FD'
     },
     buttonText: {
-        color: '#fff',
         fontSize: 16
     },
     buttonOutline: {
@@ -45,9 +47,31 @@ const defaultStyles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center'
     },
-    buttonOutlineText: {
-        color: '#000',
+    errorContainer: {
+        flex: 1,
+        height: '100%',
+        width: '100%',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    errorText: {
+        textAlign: 'center',
+        color: 'gray',
+        fontSize: 16,
+        marginVertical: 15
+    },
+    badge: {
+        paddingHorizontal: 15,
+        paddingVertical: 2,
+        borderRadius: 4
+    },
+    defaultText: {
         fontSize: 16
+    },
+    defaultTitle: {
+        fontSize: 18,
+        fontWeight: '500',
+        marginBottom: 5
     }
 });
 

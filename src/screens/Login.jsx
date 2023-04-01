@@ -1,24 +1,24 @@
 import React, { useEffect } from 'react';
-import { Pressable } from 'react-native';
 import { StyleSheet, Text, View, TextInput } from 'react-native';
 import defaultStyles from '../defaultStyles';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import firebaseConfig from './../config';
 import { ToastAndroid } from 'react-native';
 import { initializeApp } from 'firebase/app';
+import PressButton from './../components/PressButton';
 
 const Login = ({navigation}) => {
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth();
+    const [isLoading, setIsLoading] = React.useState(false);
     const [userData, setUserData] = React.useState({ email: '', pass: '' })
     const [isConfirmButtonDisabled, setIsConfirmButtonDisabled] = React.useState(true);
     
     useEffect(() => {
         const currentUser = auth.currentUser;
-        console.log(currentUser);
         if (currentUser) {
-            navigation.navigate('HomePage');
+            navigation.navigate('HomePage', { screen: 'Login' });
         }    
     })
 
@@ -29,16 +29,16 @@ const Login = ({navigation}) => {
     }
 
     function onConfirmar() {
+        setIsLoading(true);
         signInWithEmailAndPassword(auth, userData.email, userData.pass)
-            .then(credentials => {
-                console.log('Logando...', credentials)
+            .then(() => {
+                setIsLoading(false);
                 navigation.navigate('HomePage');
             })
-            .catch( error => ToastAndroid.showWithGravity(error.message, ToastAndroid.SHORT, ToastAndroid.CENTER));
-    }
-
-    function onNovaConta() {
-        navigation.navigate('NewAccount');
+            .catch( error => {
+                setIsLoading(false);
+                ToastAndroid.showWithGravity(error.message, ToastAndroid.SHORT, ToastAndroid.CENTER)
+            });
     }
 
     return (
@@ -62,22 +62,18 @@ const Login = ({navigation}) => {
                     onChangeText={pass => onChangeUserData({ ...userData, pass })}> 
                 </TextInput>
             </View>
-            <Pressable onPress={ () => onConfirmar() }
-                style={({pressed}) => [
-                    { backgroundColor: pressed ? '#6BA6FF' : '#4790FD' },
-                    { opacity: isConfirmButtonDisabled ? 0.6 : 1 },       
-                    defaultStyles.button 
-                ]}
-                disabled={isConfirmButtonDisabled} >
-                <Text style={ defaultStyles.buttonText }>Confirmar</Text>
-            </Pressable>
-            <Pressable onPress={ () => onNovaConta() }
-                style={({pressed}) => [
-                    { opacity: pressed ? 0.6 : 1 },
-                    defaultStyles.buttonOutline 
-                ]}>
-                <Text style={ defaultStyles.buttonOutlineText }>Nova conta</Text>
-            </Pressable>
+            <PressButton 
+                onClick={() => onConfirmar()} 
+                text="Confirmar"
+                loading={isLoading} 
+                disabled={isConfirmButtonDisabled} 
+            />
+            <PressButton 
+                onClick={() => navigation.navigate('NewAccount')} 
+                text="Nova conta"
+                color="#000"
+                styles={ defaultStyles.buttonOutline }
+            />
         </View>
     );
 };

@@ -1,104 +1,80 @@
-import { Pressable, StyleSheet, Text, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import { getAuth } from 'firebase/auth';
 import firebaseConfig from './../config';
 import { initializeApp } from 'firebase/app';
-import defaultStyles from './../defaultStyles';
-import { child, get, getDatabase, ref } from 'firebase/database';
-import { useState } from 'react';
+import { query } from 'firebase/database';
+import { useState, useEffect, React, useCallback } from 'react';
 import { ScrollView } from "react-native";
-import moment from "moment/moment";
+import PressButton from './../components/PressButton';
+import AlimentadorListItem from "../components/AlimentadorListItem";
+import { getFirestore, collection, where, getDocs } from 'firebase/firestore';
+import { Text } from "react-native";
+import { BackHandler } from "react-native";
+import defaultStyles from './../defaultStyles';
+import { RefreshControl } from "react-native";
+import { LoadingSpin } from "../components/LoadingSpin";
 
-const HomePage = ({ navigation }) => {
+const HomePage = ({ route, navigation }) => {
 
+    const { screen } = route.params;
     const app = initializeApp(firebaseConfig);
     const auth = getAuth();
     const currentUser = auth.currentUser;
 
-    const [alimentadores, setAlimentadores] = useState([
-        {
-            id: 1,
-            apelido: 'Pote sala',
-            nivel: 50.0,
-            agendamentos: [
-                {
-                    descricao: 'Jantar',
-                    horario: '21:30',
-                    doses: 3
-                },
-                {
-                    descricao: 'Café da manhã',
-                    horario: '10:00',
-                    doses: 3
-                },
-                {
-                    descricao: 'Almoço',
-                    horario: '12:00',
-                    doses: 3
-                }
-            ],
-            status: 'CONECTADO'
-        },
-    ]);
+    const [alimentadores, setAlimentadores] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-    function loadAlimentadores() {
-        const dbRef = ref(getDatabase(app));
-        get(child(dbRef, `usuarios/${currentUser.uid}/alimentadores`))
-        .then( snapshot => {
-            if (snapshot.exists()) {
-                // console.log(snapshot)
-            }
-        })
-        .catch( error => ToastAndroid.showWithGravity(error.message, ToastAndroid.SHORT, ToastAndroid.CENTER));
-    }
+    useEffect(() => {
+        loadAlimentadores();
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true)
+        return () => backHandler.remove();
+    }, [screen]);
 
-    function getNextHorarioFromAgendamentos(agendamentos) {
-        const today = moment().toLocaleString();
-        const next = agendamentos.find( agendamento => {
-            return moment(today).isBefore(moment(`${moment().toDate().toLocaleDateString()} ${agendamento.horario}`, 'DD/MM/YYYY HH:mm'));
-        });
-        return next || agendamentos.sort((a, b) => {
-            if (moment(`${moment().toDate().toLocaleDateString()} ${a.horario}`, 'DD/MM/YYYY HH:mm')
-            .isBefore(moment(`${moment().toDate().toLocaleDateString()} ${b.horario}`, 'DD/MM/YYYY HH:mm'))) {
-                return -1;
-            }
-            if (moment(`${moment().toDate().toLocaleDateString()} ${a.horario}`, 'DD/MM/YYYY HH:mm')
-            .isAfter(moment(`${moment().toDate().toLocaleDateString()} ${b.horario}`, 'DD/MM/YYYY HH:mm'))) {
-                return 1;
-            }
-            return 0;
-        })[0];
-    }
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await loadAlimentadores();
+        setRefreshing(false);
+    });
 
-    function getProximaDosagemFromAlimentador(alimentador) {
-        const nextHour = getNextHorarioFromAgendamentos(alimentador.agendamentos);
-        return nextHour.horario;
+    async function loadAlimentadores() {
+        setIsLoading(true);
+        const db = getFirestore(app);
+        const q = query(collection(db, 'usuarioAlimentadores'), where('usuarioId', '==', currentUser.uid));
+        const snapshot = await getDocs(q);
+        let list = snapshot.docs.map(doc => { return { ...doc.data(), id: doc.id }});
+        setAlimentadores(list || []);
+        setIsLoading(false);
     }
 
     return (
         <View style={styles.container}>
-            <Pressable onPress={() => onNovoAlimentador()}
-                style={({ pressed }) => [
-                    { backgroundColor: pressed ? '#6BA6FF' : '#4790FD' },
-                    defaultStyles.button
-                ]} >
-                <Text style={defaultStyles.buttonText}>Novo alimentador</Text>
-            </Pressable>
-            <ScrollView style={styles.listContainer}>
-                {
-                    alimentadores.map(alimentador => (
-                        <View key={alimentador.id} style={styles.listItem}>
-                            <View style={{ flex: 1 }}>
-                                <Text style={styles.listItemTitle}>{alimentador.apelido}</Text>
-                                <Text>Nível de ração: {alimentador.nivel}%</Text>
-                                <Text>Próx. dosagem: { getProximaDosagemFromAlimentador(alimentador) }</Text>
-                            </View>
-                            <View style={ styles.listItemArrow }>
-                                <Text>a</Text>
-                            </View>
-                        </View>
-                    ))
-                }
-            </ScrollView>
+            {
+                alimentadores.length > 0 ?
+                <ScrollView
+                    style={styles.listContainer}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    } >
+                    {  
+                        alimentadores.map(alimentador => (
+                            <AlimentadorListItem key={alimentador.id} alimentador={alimentador} navigation={navigation} />
+                        ))
+                    }
+                </ScrollView> :
+                <View style={defaultStyles.errorContainer}>
+                    {
+                        isLoading ?
+                        <LoadingSpin color="#000" /> :
+                        <Text style={defaultStyles.errorText}>Nenhum alimentador cadastrado</Text>
+                    }
+                </View>
+            }
+            <PressButton 
+                onClick={() => navigation.navigate('NewAlimentador')} 
+                text="Novo alimentador"
+                icon={{ name: 'plus' }}
+            />
         </View>
     )
 }
@@ -111,27 +87,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'flex-start',
         gap: 15,
-        paddingHorizontal: 30
+        paddingHorizontal: 30,
+        paddingBottom: 30
     },
     listContainer: {
         width: '100%'
-    },
-    listItem: {
-        flexDirection: 'row',
-        width: '100%',
-        borderBottomColor: '#f3f3f3',
-        borderBottomWidth: 1,
-        gap: 5 ,
-        padding: 10
-    },
-    listItemTitle: {
-        fontSize: 18,
-        fontWeight: '500'
-    },
-    listItemArrow: {
-        width: 40,
-        justifyContent: 'center',
-        alignItems: 'center'
     }
 });
 

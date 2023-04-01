@@ -1,36 +1,41 @@
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { Text, TextInput, ToastAndroid } from "react-native";
-import { Pressable, StyleSheet, View } from "react-native"
+import { StyleSheet, View } from "react-native"
 import { ScrollView } from "react-native";
 import defaultStyles from "../defaultStyles";
 import firebaseConfig from "./../config";
 import { initializeApp } from 'firebase/app';
 import { addDoc, collection, getFirestore } from 'firebase/firestore';
+import PressButton from './../components/PressButton';
 
 const NewAccount = ({ navigation }) => {
 
     const app = initializeApp(firebaseConfig);
+    const [isLoading, setIsLoading] = useState(false);
     const [newUser, setNewUser] = useState({ alimentadores: {} });
     const [confirmPass, setConfirmPass] = useState('');
     const [isConfirmButtonDisabled, setIsConfirmButtonDisabled] = useState(true);
     
     async function onConfirmar() {
+        setIsLoading(true);
         const auth = getAuth();
         const database = getFirestore(app);
 
         createUserWithEmailAndPassword(auth, newUser.email, newUser.pass)
             .then(credentials => {
+                setIsLoading(false);
                 delete newUser.pass;
                 newUser.uid = credentials.user.uid;
                 addDoc(collection(database, 'usuarios'), newUser);
                 ToastAndroid.showWithGravity('Conta criada com sucesso!', ToastAndroid.SHORT, ToastAndroid.CENTER);
                 navigation.navigate('HomePage');
             })
-            .catch(error => ToastAndroid.showWithGravity(error.message, ToastAndroid.SHORT, ToastAndroid.CENTER));
+            .catch(error => {
+                setIsLoading(false);
+                ToastAndroid.showWithGravity(error.message, ToastAndroid.SHORT, ToastAndroid.CENTER)
+            });
     }
-
-    function onCancelar() { navigation.navigate('Login'); }
 
     function onChangeNewUser(user) {
         let { name, email, pass } = user;
@@ -39,7 +44,6 @@ const NewAccount = ({ navigation }) => {
 
     function validateForm(confirmPass) {
         let condition = (!(newUser.name && newUser.email && newUser.pass) || confirmPass !== newUser.pass);
-        console.log({confirmPass});
         setConfirmPass(confirmPass);
         setIsConfirmButtonDisabled(condition);
     }
@@ -87,22 +91,18 @@ const NewAccount = ({ navigation }) => {
                         onChangeText={pass => validateForm(pass)}>
                     </TextInput>
                 </View>
-                <Pressable onPress={ () => onConfirmar() }
-                    style={({pressed}) => [
-                        { backgroundColor: pressed ? '#6BA6FF' : '#4790FD' },
-                        { opacity: isConfirmButtonDisabled ? 0.6 : 1 },       
-                        defaultStyles.button 
-                    ]}
-                    disabled={isConfirmButtonDisabled} >
-                    <Text style={ defaultStyles.buttonText }>Confirmar</Text>
-                </Pressable>
-                <Pressable onPress={() => onCancelar()}
-                    style={({ pressed }) => [
-                        { opacity: pressed ? 0.6 : 1 },
-                        defaultStyles.buttonOutline
-                    ]}>
-                    <Text style={defaultStyles.buttonOutlineText}>Cancelar</Text>
-                </Pressable>
+                <PressButton 
+                    onClick={() => onConfirmar()} 
+                    text="Confirmar"
+                    loading={isLoading} 
+                    disabled={isConfirmButtonDisabled} 
+                />
+                <PressButton
+                    onClick={() => navigation.navigate('Login')} 
+                    text="Cancelar"
+                    color="#000"
+                    styles={ defaultStyles.buttonOutline }
+                />
             </View>
         </ScrollView>
     )

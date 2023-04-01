@@ -2,10 +2,13 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFonts } from 'expo-font';
 import { useCallback } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Login from './src/screens/Login';
 import NewAccount from './src/screens/NewAccount';
 import HomePage from './src/screens/HomePage';
+import NewAlimentador from './src/screens/NewAlimentador';
+import NewAlimentadorInfo from './src/screens/NewAlimentadorInfo';
+import PainelAlimentador from './src/screens/PainelAlimentador';
 
 export default function App() {
 
@@ -40,6 +43,27 @@ export default function App() {
                     headerBackVisible: false,
                     headerTitleAlign: 'center',
                     title: 'Home page',
+                    headerTitleStyle: {fontFamily: 'OpenSans'}
+                }} />
+                <Stack.Screen name="NewAlimentador" component={NewAlimentador} options={{ 
+                    headerShadowVisible: false, 
+                    headerBackVisible: true,
+                    headerTitleAlign: 'center',
+                    title: 'Novo alimentador',
+                    headerTitleStyle: {fontFamily: 'OpenSans'}
+                }} />
+                <Stack.Screen name="NewAlimentadorInfo" component={NewAlimentadorInfo} options={{ 
+                    headerShadowVisible: false,
+                    headerBackVisible: false,
+                    headerTitleAlign: 'center',
+                    title: 'Novo alimentador',
+                    headerTitleStyle: {fontFamily: 'OpenSans'}
+                }} />
+                <Stack.Screen name="PainelAlimentador" component={PainelAlimentador} options={{ 
+                    headerShadowVisible: false,
+                    headerBackVisible: true,
+                    headerTitleAlign: 'center',
+                    title: 'Painel',
                     headerTitleStyle: {fontFamily: 'OpenSans'}
                 }} />
             </Stack.Navigator>
