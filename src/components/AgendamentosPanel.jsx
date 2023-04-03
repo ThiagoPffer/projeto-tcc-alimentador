@@ -8,13 +8,12 @@ import AgendamentoListItem from './AgendamentoListItem';
 import { getDatabase, ref, child, get, remove } from 'firebase/database';
 import { LoadingSpin } from './LoadingSpin';
 
-const AgendamentosPanel = props => {
+const AgendamentosPanel = ({ navigation, alimentadorId, usuarioAlimentadorId, refresh }) => {
 
-    const alimentadorId = props.alimentadorId;
     const [isLoading, setIsLoading] = useState(false);
     const [agendamentos, setAgendamentos] = useState([]);
 
-    useEffect(() => loadAgendamentos(), [alimentadorId]);
+    useEffect(() => loadAgendamentos(), [alimentadorId, refresh]);
 
     const onDeleteAgendamento = (agendamentoId) => {
         const db = getDatabase();
@@ -45,7 +44,7 @@ const AgendamentosPanel = props => {
                 isLoading ?
                 <LoadingSpin color="#000"></LoadingSpin> :
                 agendamentos.length > 0 ?
-                <ScrollView style={styles.listContainer}>
+                <ScrollView style={styles.listContainer} >
                     {
                         agendamentos.map(agendamento => (
                             <AgendamentoListItem 
@@ -60,7 +59,7 @@ const AgendamentosPanel = props => {
                 <Text style={defaultStyles.errorText}>Nenhum agendamento</Text>
             }
             <PressButton
-                onClick={() => console.log('click')}
+                onClick={() => navigation.navigate('NovoAgendamento', {usuarioAlimentadorId, alimentadorId})}
                 text="Novo agendamento"
                 icon={{ name: 'plus' }}
             />
@@ -82,6 +81,7 @@ const styles = StyleSheet.create({
         width: '100%',
         borderBottomWidth: 1,
         borderBottomColor: '#f3f3f3',
+        maxHeight: 350,
         paddingBottom: 15,
         gap: 15
     },

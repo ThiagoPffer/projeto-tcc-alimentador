@@ -9,6 +9,7 @@ import HomePage from './src/screens/HomePage';
 import NewAlimentador from './src/screens/NewAlimentador';
 import NewAlimentadorInfo from './src/screens/NewAlimentadorInfo';
 import PainelAlimentador from './src/screens/PainelAlimentador';
+import NovoAgendamento from './src/screens/NovoAgendamento';
 
 export default function App() {
 
@@ -64,6 +65,13 @@ export default function App() {
                     headerBackVisible: true,
                     headerTitleAlign: 'center',
                     title: 'Painel',
+                    headerTitleStyle: {fontFamily: 'OpenSans'}
+                }} />
+                <Stack.Screen name="NovoAgendamento" component={NovoAgendamento} options={{ 
+                    headerShadowVisible: false,
+                    headerBackVisible: true,
+                    headerTitleAlign: 'center',
+                    title: 'Novo agendamento',
                     headerTitleStyle: {fontFamily: 'OpenSans'}
                 }} />
             </Stack.Navigator>

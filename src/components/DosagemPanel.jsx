@@ -6,18 +6,13 @@ import { Icon } from '@rneui/themed';
 import { useState } from "react";
 import { getDatabase, ref, update } from 'firebase/database';
 import EnumStatus from './../utils/enumStatus';
+import Dosagem from "./Dosagem";
 
 const DosagemPanel = props => {
 
     const { alimentadorId, status } = props;
     const [doses, setDoses] = useState("1");
     const [isLoading, setIsLoading] = useState(false);
-
-    function increaseOrDecrease(value) {
-        if(value >= 1 && value <= 10) {
-            setDoses(value.toString());
-        }
-    }
 
     function onIniciarDosagem() {
         setIsLoading(true);
@@ -31,26 +26,7 @@ const DosagemPanel = props => {
     return (
         <View style={styles.panel}>
             <Text style={defaultStyles.defaultTitle}>Selecione a quantidade de doses:</Text>
-            <View style={{flexDirection: 'row', gap: 15}}>
-                <Pressable onPress={() => increaseOrDecrease(parseInt(doses) - 1)}
-                    style={({ pressed }) => [
-                        { opacity: pressed ? 0.6 : 1 },  
-                        styles.inputButton
-                    ]}>
-                    <Icon name="minus" color="#fff" type="material-community" />
-                </Pressable>
-                <TextInput 
-                    style={[defaultStyles.input, { flex: 1, textAlign: 'center', color: '#000' }]}
-                    editable={false} 
-                    value={doses} />
-                <Pressable onPress={() => increaseOrDecrease(parseInt(doses) + 1)}
-                    style={({ pressed }) => [
-                        { opacity: pressed ? 0.6 : 1 },  
-                        styles.inputButton
-                    ]}>
-                    <Icon name="plus" color="#fff" type="material-community" />
-                </Pressable>
-            </View>
+            <Dosagem doses={doses} setDoses={setDoses} />
             <PressButton
                 onClick={() => onIniciarDosagem()}
                 text="Iniciar dosagem"
@@ -67,15 +43,6 @@ const styles = StyleSheet.create({
         borderBottomColor: '#f3f3f3',
         paddingBottom: 15,
         gap: 15
-    },
-    inputButton: {
-        flex: 1,
-        flexDirection: 'row',
-        height: 45,
-        borderRadius: 4,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#4790FD'
     }
 });
 
