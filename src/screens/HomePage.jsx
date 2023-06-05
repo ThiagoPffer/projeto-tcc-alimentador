@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native"
+import { StyleSheet, ToastAndroid, View } from "react-native"
 import { getAuth } from 'firebase/auth';
 import firebaseConfig from './../config';
 import { initializeApp } from 'firebase/app';
@@ -41,10 +41,15 @@ const HomePage = ({ route, navigation }) => {
         setIsLoading(true);
         const db = getFirestore(app);
         const q = query(collection(db, 'usuarioAlimentadores'), where('usuarioId', '==', currentUser.uid));
-        const snapshot = await getDocs(q);
-        let list = snapshot.docs.map(doc => { return { ...doc.data(), id: doc.id }});
-        setAlimentadores(list || []);
-        setIsLoading(false);
+        getDocs(q).then(snapshot => {
+            let list = snapshot.docs.map(doc => { return { ...doc.data(), id: doc.id }});
+            setAlimentadores(list || []);
+        }).catch(error => {
+            ToastAndroid.showWithGravity(error.message, ToastAndroid.SHORT, ToastAndroid.CENTER);
+            setAlimentadores([]);
+        }).finally(() => {
+            setIsLoading(false);
+        });
     }
 
     return (

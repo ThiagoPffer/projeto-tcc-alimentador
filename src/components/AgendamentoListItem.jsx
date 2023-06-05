@@ -10,18 +10,17 @@ const AgendamentoListItem = props => {
 
     useEffect(() => {
         setAgendamento(props.agendamento)
-        setHorario(getHorarioFromMillis(agendamento.horario))
+        setHorario(getHorarioFromAgendamento(agendamento.hora, agendamento.minuto))
     }, [props]);
 
-    function getHorarioFromMillis(millis) {
-        const data = new Date(millis);
-        return `${data.getHours() < 10 ? '0' + data.getHours() : data.getHours()}:${data.getMinutes() < 10 ? '0' + data.getMinutes() : data.getMinutes()}`
+    function getHorarioFromAgendamento(hora, minuto) {
+        return `${hora < 10 ? '0' + hora : hora}:${minuto < 10 ? '0' + minuto : minuto}`
     }
 
     return (
         <View style={styles.listItem}>
             <View style={{ flex: 1 }}>
-                <Text style={styles.listItemTitle}>{`${horario} (${agendamento.doses} doses)`}</Text>
+                <Text style={styles.listItemTitle}>{horario}</Text>
                 <Text>{agendamento.titulo}</Text>
             </View>
             <View>

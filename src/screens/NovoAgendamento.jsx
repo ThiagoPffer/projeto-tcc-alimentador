@@ -5,17 +5,15 @@ import { StyleSheet } from "react-native";
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import PressButton from "../components/PressButton";
 import { Pressable } from "react-native";
-import { getDatabase, ref, set, update } from "firebase/database";
+import { getDatabase, ref, set } from "firebase/database";
 import GenerateUUID from 'react-native-uuid';
 import { ToastAndroid } from "react-native";
-import Dosagem from './../components/Dosagem';
 
 const NovoAgendamento = ({ route, navigation }) => {
 
-    const { alimentadorId, usuarioAlimentadorId } = route.params;
+    const { alimentadorId, usuarioAlimentadorId, agendamentos } = route.params;
     const [isLoading, setIsLoading] = useState(false);
     const [titulo, setTitulo] = useState('');
-    const [doses, setDoses] = useState('1');
     const [horario, setHorario] = useState(new Date());
 
     const openDatePicker = () => {
@@ -28,18 +26,27 @@ const NovoAgendamento = ({ route, navigation }) => {
         });
     }
 
+    const formatAgendamentosToObj = (agendamentos) => {
+        let agendamentosObj = {};
+        agendamentos.forEach(agendamento => {
+            const agId = agendamento.id;
+            delete agendamento.id;
+            agendamentosObj[agId] = agendamento;
+        });
+        return agendamentosObj;
+    }
+
     const onSalvar = () => {
         setIsLoading(true);
+        
+        let agendamentosSave = formatAgendamentosToObj(agendamentos);
+        agendamentosSave[GenerateUUID.v4()] = {titulo, hora: horario.getHours(), minuto: horario.getMinutes()};
+        
         const db = getDatabase();
-        set(ref(db, `alimentadores/${alimentadorId}/agendamentos/${GenerateUUID.v4()}`), {
-            titulo,
-            horario: horario.getTime(),
-            doses
-        }).then(() => {
+        set(ref(db, `alimentadores/${alimentadorId}/agendamentos/`), agendamentosSave).then(() => {
             navigation.navigate('PainelAlimentador', {
                 alimentadorId, 
-                id: usuarioAlimentadorId,
-                screen: 'NovoAgendamento'
+                id: usuarioAlimentadorId
             });
         }).catch(error => {
             ToastAndroid.showWithGravity(error.message, ToastAndroid.SHORT, ToastAndroid.CENTER);
@@ -72,10 +79,6 @@ const NovoAgendamento = ({ route, navigation }) => {
                         {horario.getMinutes() < 10 ? '0' + horario.getMinutes() : horario.getMinutes()}
                     </Text>
                 </Pressable>
-            </View>
-            <View style={styles.panel}>
-                <Text style={defaultStyles.defaultTitle}>Selecione a quantidade de doses:</Text>
-                <Dosagem doses={doses} setDoses={setDoses} />
             </View>
             <PressButton 
                 onClick={() => onSalvar()} 

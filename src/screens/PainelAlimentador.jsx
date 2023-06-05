@@ -35,7 +35,7 @@ const PainelAlimentador = ({route, navigation}) => {
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }>
             <InfoPanel alimentadorId={alimentadorId} />
-            <DosagemPanel alimentadorId={alimentadorId} />
+            <DosagemPanel alimentadorId={alimentadorId} navigation={navigation} />
             <AgendamentosPanel 
                 navigation={navigation} 
                 alimentadorId={alimentadorId} 

@@ -13,7 +13,7 @@ const InfoPanel = ({ alimentadorId }) => {
     const db = getDatabase();
     const dbRef = ref(db, `alimentadores/${alimentadorId}`);
     const [isLoading, setIsLoading] = useState(false);
-    const [alimentador, setAlimentador] = useState({});
+    const [alimentador, setAlimentador] = useState({ dosagem: {} });
     const [badgeColor, setBadgeColor] = useState('');
 
     useEffect(() => loadAlimentador(), [ alimentadorId ])
@@ -23,7 +23,7 @@ const InfoPanel = ({ alimentadorId }) => {
         onValue(dbRef, snapshot => {
             const data = snapshot.val();
             setAlimentador(data);
-            setBadgeColor(getBadgeColor(data.status));
+            setBadgeColor(getBadgeColor(data.dosagem.status));
             setIsLoading(false);
         });
     }
@@ -43,7 +43,7 @@ const InfoPanel = ({ alimentadorId }) => {
                         <View style={styles.row}>
                             <Text style={defaultStyles.defaultText}>Status: </Text>
                             <View style={[defaultStyles.badge, {backgroundColor: badgeColor}]}>
-                                <Text style={defaultStyles.defaultText}>{alimentador.status}</Text>
+                                <Text style={defaultStyles.defaultText}>{alimentador.dosagem.status}</Text>
                             </View>
                         </View>
                         <View style={styles.row}>
@@ -54,7 +54,7 @@ const InfoPanel = ({ alimentadorId }) => {
                 ) : (<LoadingSpin color='#000' />)
             }
             {
-                alimentador.status === EnumStatus.INATIVO ? (
+                alimentador.dosagem.status === EnumStatus.INATIVO ? (
                     <Icon
                         onPress={() => updateStatus()}
                         style={{padding: 5, borderRadius: 4}}

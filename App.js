@@ -10,6 +10,7 @@ import NewAlimentador from './src/screens/NewAlimentador';
 import NewAlimentadorInfo from './src/screens/NewAlimentadorInfo';
 import PainelAlimentador from './src/screens/PainelAlimentador';
 import NovoAgendamento from './src/screens/NovoAgendamento';
+import Historico from './src/screens/Historico';
 
 export default function App() {
 
@@ -72,6 +73,13 @@ export default function App() {
                     headerBackVisible: true,
                     headerTitleAlign: 'center',
                     title: 'Novo agendamento',
+                    headerTitleStyle: {fontFamily: 'OpenSans'}
+                }} />
+                <Stack.Screen name="Historico" component={Historico} options={{ 
+                    headerShadowVisible: false,
+                    headerBackVisible: true,
+                    headerTitleAlign: 'center',
+                    title: 'Histórico',
                     headerTitleStyle: {fontFamily: 'OpenSans'}
                 }} />
             </Stack.Navigator>

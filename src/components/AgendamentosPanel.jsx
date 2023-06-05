@@ -59,7 +59,8 @@ const AgendamentosPanel = ({ navigation, alimentadorId, usuarioAlimentadorId, re
                 <Text style={defaultStyles.errorText}>Nenhum agendamento</Text>
             }
             <PressButton
-                onClick={() => navigation.navigate('NovoAgendamento', {usuarioAlimentadorId, alimentadorId})}
+                onClick={() => navigation.navigate('NovoAgendamento', {usuarioAlimentadorId, alimentadorId, agendamentos})}
+                disabled={agendamentos.length === 6}
                 text="Novo agendamento"
                 icon={{ name: 'plus' }}
             />

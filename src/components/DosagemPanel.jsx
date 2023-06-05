@@ -1,36 +1,35 @@
-import { TextInput, View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import PressButton from "./PressButton";
 import defaultStyles from "../defaultStyles";
-import { Pressable } from "react-native";
-import { Icon } from '@rneui/themed';
 import { useState } from "react";
 import { getDatabase, ref, update } from 'firebase/database';
-import EnumStatus from './../utils/enumStatus';
-import Dosagem from "./Dosagem";
 
-const DosagemPanel = props => {
+const DosagemPanel = ({ alimentadorId, navigation }) => {
 
-    const { alimentadorId, status } = props;
-    const [doses, setDoses] = useState("1");
     const [isLoading, setIsLoading] = useState(false);
 
     function onIniciarDosagem() {
         setIsLoading(true);
         const db = getDatabase();
-        const dbRef = ref(db, `alimentadores/${alimentadorId}`);
-        update(dbRef, { dosagem: parseInt(doses), status: 'Dosagem pendente' }).finally(() => {
+        const dbRef = ref(db, `alimentadores/${alimentadorId}/dosagem`);
+        update(dbRef, { status: 'Dosagem pendente' }).finally(() => {
             setIsLoading(false);
         });
     }
-
+    
     return (
         <View style={styles.panel}>
-            <Text style={defaultStyles.defaultTitle}>Selecione a quantidade de doses:</Text>
-            <Dosagem doses={doses} setDoses={setDoses} />
+            <Text style={defaultStyles.defaultTitle}>Dosagem:</Text>
             <PressButton
                 onClick={() => onIniciarDosagem()}
                 text="Iniciar dosagem"
                 loading={isLoading}
+            />
+            <PressButton
+                onClick={() => navigation.navigate('Historico', { alimentadorId })}
+                text="Histórico"
+                color="#000"
+                styles={ defaultStyles.buttonOutline }
             />
         </View>
     )
