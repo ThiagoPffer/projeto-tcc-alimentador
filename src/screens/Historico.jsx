@@ -47,7 +47,6 @@ const Historico = ({ route, navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={defaultStyles.defaultTitle}>Dosagens realizadas:</Text>
             {
                 isLoading ?
                 <LoadingSpin color="#000"></LoadingSpin> :
@@ -59,12 +58,19 @@ const Historico = ({ route, navigation }) => {
                     {
                         dosagens.length > 0 ?
                         dosagens.map(dosagem => (
-                            <View style={styles.historicoItem}>
-                                <Text>{
-                                    `${getDateFromDosagem(dosagem)}`
-                                }</Text>
-                                <Text style={{fontWeight: 'bold'}}>{dosagem.acao}</Text>
-                                <Text>{`${dosagem.nivel}%`}</Text>
+                            <View style={styles.historicoItem} key={dosagem.id}>
+                                <View>
+                                    <Text style={{fontWeight: 'bold'}}>Data e hora</Text>
+                                    <Text>{getDateFromDosagem(dosagem)}</Text>
+                                </View>
+                                <View>
+                                    <Text style={{fontWeight: 'bold'}}>Ação</Text>
+                                    <Text>{dosagem.acao}</Text>
+                                </View>
+                                <View>
+                                    <Text style={{fontWeight: 'bold'}}>Nível</Text>
+                                    <Text>{`${dosagem.nivel}%`}</Text>
+                                </View>
                             </View>
                         )) :
                         <Text style={defaultStyles.errorText}>Nenhuma dosagem realizada</Text>
