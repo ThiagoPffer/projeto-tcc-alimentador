@@ -30,7 +30,15 @@ const InfoPanel = ({ alimentadorId }) => {
 
     function updateStatus() {
         setIsLoading(true);
-        update(dbRef, { status: EnumStatus.CONECTADO })
+        const statusRef = ref(db, `alimentadores/${alimentadorId}/dosagem`)
+        update(statusRef, { status: EnumStatus.CONECTADO })
+            .catch(error => ToastAndroid.showWithGravity(error.message, ToastAndroid.SHORT, ToastAndroid.CENTER))
+            .finally(() => setIsLoading(false));
+    }
+
+    function updateData() {
+        const statusRef = ref(db, `alimentadores/${alimentadorId}/dosagem`)
+        update(statusRef, { status: EnumStatus.ATUALIZANDO_DADOS })
             .catch(error => ToastAndroid.showWithGravity(error.message, ToastAndroid.SHORT, ToastAndroid.CENTER))
             .finally(() => setIsLoading(false));
     }
@@ -39,17 +47,25 @@ const InfoPanel = ({ alimentadorId }) => {
         <View style={[styles.panel]}>
             {
                 !isLoading ? (
-                    <View style={{gap: 5, flex: 1}}>
-                        <View style={styles.row}>
-                            <Text style={defaultStyles.defaultText}>Status: </Text>
-                            <View style={[defaultStyles.badge, {backgroundColor: badgeColor}]}>
-                                <Text style={defaultStyles.defaultText}>{alimentador.dosagem.status}</Text>
+                    <View style={{gap: 5, flex: 1, flexDirection: 'row'}}>
+                        <View style={{gap: 5, flex: 1}}>
+                            <View style={styles.row}>
+                                <Text style={defaultStyles.defaultText}>Status: </Text>
+                                <View style={[defaultStyles.badge, {backgroundColor: badgeColor}]}>
+                                    <Text style={defaultStyles.defaultText}>{alimentador.dosagem.status}</Text>
+                                </View>
+                            </View>
+                            <View style={styles.row}>
+                                <Text style={defaultStyles.defaultText}>Nível de ração: </Text>
+                                <Text style={defaultStyles.defaultText}>{alimentador.nivel+'%'}</Text>
                             </View>
                         </View>
-                        <View style={styles.row}>
-                            <Text style={defaultStyles.defaultText}>Nível de ração: </Text>
-                            <Text style={defaultStyles.defaultText}>{alimentador.nivel+'%'}</Text>
-                        </View>
+                        <Icon
+                            onPress={() => updateData()}
+                            style={{padding: 5, borderRadius: 4}}
+                            name="reload"
+                            type="material-community" 
+                        />
                     </View>
                 ) : (<LoadingSpin color='#000' />)
             }

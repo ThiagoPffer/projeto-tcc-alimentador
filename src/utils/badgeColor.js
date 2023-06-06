@@ -11,6 +11,9 @@ const getBadgeColor = (status) => {
         case EnumStatus.DOSANDO:
             return '#9CFFFF';
 
+        case EnumStatus.ATUALIZANDO_DADOS:
+            return '#FFFCB4';
+
         case EnumStatus.INATIVO:
             return '#ECECEC';
         
